@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paris Discovery Guide — June 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F6F2EC;
+    --ink: #1c1814;
+    --muted: #7a6e64;
+    --faint: #e6ddd2;
+    --rose: #b86a6a;
+    --gold: #a8882e;
+    --sage: #5e8c76;
+    --lavender: #7a6ea0;
+    --white: #ffffff;
+  }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 14px;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 64px 40px 48px;
+    border-bottom: 1px solid var(--faint);
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 18px;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 7vw, 64px);
+    font-weight: 400;
+    line-height: 1.05;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 em { font-style: italic; color: var(--rose); }
+
+  .hero-sub {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 520px;
+    margin-bottom: 28px;
+    line-height: 1.75;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid var(--faint);
+  }
+
+  .meta-item { font-size: 12px; color: var(--muted); }
+  .meta-item strong { display: block; color: var(--ink); font-weight: 500; font-size: 13px; margin-bottom: 1px; }
+
+  /* ─── TAGS ─── */
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+  .t-rose     { background: #f2dede; color: #6b2c2c; }
+  .t-gold     { background: #f0e6c8; color: #614e18; }
+  .t-sage     { background: #d5e8de; color: #27513e; }
+  .t-lavender { background: #e2ddf0; color: #352d5c; }
+  .t-ink      { background: #dedad4; color: #2a2018; }
+
+  /* ─── REFERENCE BOX ─── */
+  .ref-box {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--faint);
+    background: var(--white);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .ref-box strong { color: var(--ink); font-weight: 500; }
+
+  /* ─── CONTENT WRAPPER ─── */
+  .content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  /* ─── SECTION HEADER ─── */
+  .section-head {
+    padding-top: 52px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--faint);
+    margin-bottom: 0;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--ink);
+  }
+  .section-title em { font-style: italic; color: var(--rose); }
+
+  /* ─── PIN CARD ─── */
+  .pin {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 0 16px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--faint);
+  }
+
+  .pin-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .pin-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+  .c-rose     { background: var(--rose); }
+  .c-gold     { background: var(--gold); }
+  .c-sage     { background: var(--sage); }
+  .c-lavender { background: var(--lavender); }
+  .c-ink      { background: #8a7e74; }
+
+  .pin-vline {
+    width: 1px;
+    flex: 1;
+    min-height: 20px;
+    background: var(--faint);
+    margin-top: 6px;
+  }
+
+  .pin-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 5px;
+    color: var(--ink);
+  }
+
+  .pin-coords {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  .pin-coords a {
+    color: var(--rose);
+    text-decoration: none;
+  }
+  .pin-coords a:hover { text-decoration: underline; }
+
+  .pin-meta-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .pin-dist {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .obscurity {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+  }
+
+  .pin-desc {
+    font-size: 13.5px;
+    color: #342e28;
+    line-height: 1.78;
+    margin-bottom: 12px;
+  }
+
+  .egg {
+    background: var(--white);
+    border-left: 2px solid var(--rose);
+    padding: 10px 14px;
+    font-size: 12.5px;
+    color: var(--muted);
+    border-radius: 0 4px 4px 0;
+    line-height: 1.68;
+    margin-bottom: 10px;
+  }
+
+  .egg strong {
+    display: block;
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--rose);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .pin-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* ─── FOOD CARD ─── */
+  .food-card {
+    background: var(--white);
+    border: 1px solid var(--faint);
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-size: 13px;
+    line-height: 1.72;
+    color: #342e28;
+  }
+  .food-card .food-head {
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 7px;
+  }
+  .food-card strong { font-weight: 500; color: var(--ink); }
+
+  /* ─── PRACTICAL BOX ─── */
+  .practical {
+    background: var(--white);
+    border: 1px solid var(--faint);
+    border-radius: 6px;
+    padding: 28px 32px;
+    margin-top: 48px;
+  }
+  .practical h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 20px;
+  }
+  .prac-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 36px;
+  }
+  .prac-item { font-size: 13px; color: #342e28; line-height: 1.68; }
+  .prac-item span {
+    display: block;
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+    font-weight: 400;
+  }
+
+  /* ─── REFERENCE TABLE ─── */
+  .ref-table-section { margin-top: 52px; }
+  .ref-table-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 16px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  th {
+    text-align: left;
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--faint);
+  }
+  td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--faint);
+    color: #342e28;
+    vertical-align: top;
+  }
+  tr:hover td { background: var(--white); }
+
+  @media (max-width: 600px) {
+    .hero, .ref-box, .content { padding-left: 18px; padding-right: 18px; }
+    .hero { padding-top: 40px; }
+    .pin { grid-template-columns: 42px 1fr; gap: 0 10px; }
+    .prac-grid { grid-template-columns: 1fr; }
+    table { font-size: 11px; }
+    th, td { padding: 5px 6px; }
+    #map { height: 280px; }
+    .modal-box { padding: 22px 18px; }
+  }
+
+  /* ─── WHOAMI ─── */
+  .whoami {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    margin: 18px 0 14px;
+  }
+  .whoami strong { color: var(--ink); font-weight: 500; }
+  .whoami button {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: 1px solid var(--faint);
+    border-radius: 20px;
+    padding: 4px 12px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .whoami button:hover { border-color: var(--rose); color: var(--rose); }
+
+  /* ─── LIVE MAP ─── */
+  #map {
+    height: 360px;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid var(--faint);
+    background: var(--faint);
+    z-index: 0;
+  }
+  .map-legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin: 10px 0 24px;
+  }
+  .map-legend .dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+  .dot-rose  { background: var(--rose); }
+  .dot-sage  { background: var(--sage); }
+  .dot-hotel { background: var(--gold); }
+  .leaflet-popup-content { font-family: 'Inter', sans-serif; font-size: 12px; }
+  .leaflet-popup-content b { font-family: 'Playfair Display', serif; font-size: 14px; }
+  .hotel-marker { font-size: 20px; line-height: 1; text-align: center; }
+
+  /* ─── ADD A PLACE ─── */
+  .add-place {
+    background: var(--white);
+    border: 1px solid var(--faint);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 8px;
+  }
+  .add-place-head {
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .add-place input[type="text"],
+  .add-place textarea,
+  .journal-form textarea {
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 9px 11px;
+    border: 1px solid var(--faint);
+    border-radius: 4px;
+    background: var(--cream);
+    color: var(--ink);
+    margin-bottom: 8px;
+    resize: vertical;
+  }
+  .add-place input[type="text"]:focus,
+  .add-place textarea:focus,
+  .journal-form textarea:focus { outline: 1px solid var(--rose); }
+
+  .add-place button, .journal-form button {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--white);
+    border: none;
+    border-radius: 20px;
+    padding: 9px 20px;
+    cursor: pointer;
+  }
+  .add-place button:hover, .journal-form button:hover { background: var(--rose); }
+  .add-place button:disabled, .journal-form button:disabled { opacity: 0.5; cursor: default; }
+
+  .add-place-status { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.6; min-height: 1.6em; }
+  .add-place-status.error   { color: var(--rose); }
+  .add-place-status.success { color: var(--sage); }
+
+  /* ─── JOURNAL / COMMENTS ─── */
+  .journal { margin-top: 16px; border-top: 1px dashed var(--faint); padding-top: 12px; }
+  .journal-toggle {
+    font-family: 'Inter', sans-serif;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    color: var(--muted);
+    border: 1px solid var(--faint);
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+  .journal-toggle:hover { border-color: var(--rose); color: var(--rose); }
+  .journal-toggle.has-new::after { content: ' \25CF'; color: var(--rose); }
+  .journal-body { margin-top: 12px; }
+  .journal-entry {
+    background: var(--cream);
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #342e28;
+  }
+  .journal-entry-meta {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .journal-entry-meta strong { color: var(--rose); }
+  .journal-entry-photo {
+    margin-top: 8px;
+    max-width: 100%;
+    max-height: 240px;
+    border-radius: 4px;
+    cursor: zoom-in;
+    display: block;
+  }
+  .journal-empty { font-size: 12px; color: var(--muted); font-style: italic; margin-bottom: 8px; }
+  .journal-form { margin-top: 10px; }
+  .journal-form input[type="file"] { font-size: 11px; margin-bottom: 8px; display: block; color: var(--muted); }
+
+  /* ─── ADDED-DURING-TRIP PINS ─── */
+  #added-pins .pin-num { background: var(--sage); }
+
+  /* ─── IDENTITY MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(28,24,20,0.55);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+  .modal-box {
+    background: var(--cream);
+    border-radius: 8px;
+    padding: 28px 26px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+  }
+  .modal-box h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+  .modal-box p { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+  .identity-choices { display: flex; gap: 10px; margin-bottom: 16px; }
+  .identity-choice {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    background: var(--white);
+    border: 1px solid var(--faint);
+    border-radius: 6px;
+    padding: 14px 10px;
+    cursor: pointer;
+    flex: 1;
+  }
+  .identity-choice:hover { border-color: var(--rose); color: var(--rose); }
+  .identity-other { display: flex; gap: 6px; }
+  .identity-other input {
+    flex: 1; font-family: 'Inter', sans-serif; font-size: 12px;
+    padding: 8px 10px; border: 1px solid var(--faint); border-radius: 4px; background: var(--white);
+  }
+  .identity-other button {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    background: var(--ink); color: var(--white); border: none; border-radius: 4px; padding: 0 14px; cursor: pointer;
+  }
+
+  /* ─── LIGHTBOX ─── */
+  .lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1100; padding: 20px; cursor: zoom-out;
+  }
+  .lightbox img { max-width: 100%; max-height: 100%; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="eyebrow">Discovery Guide — Paris — June 2026</div>
+  <h1>Paris<br><em>for Francesca</em></h1>
+  <p class="hero-sub">Twenty pins across 2.5 days. Everything is walkable or one metro stop away. Built around impressionist light, hidden worlds, Regency spectacle, perfume, flowers, bookshops, and the best pastry in the world.</p>
+  <div class="hero-meta">
+    <div class="meta-item"><strong>Hotel Aulivia Opéra</strong>4 Rue des Petites Écuries, 10th arr.</div>
+    <div class="meta-item"><strong>Reference point</strong>48.8698°N, 2.3533°E</div>
+    <div class="meta-item"><strong>June 11–14</strong>Thu evening to Sun morning</div>
+    <div class="meta-item"><strong>Nearest metro</strong>Château d'Eau — Ligne 4 (3 min walk)</div>
+  </div>
+</div>
+
+<!-- REF BOX -->
+<div class="ref-box">
+  <span><strong>Walking</strong> pins under 2 km</span>
+  <span><strong>Metro</strong> pins 2–4 km — one or two stops on L4 or L7</span>
+  <span>Distances are as-the-crow-flies from hotel. Walking distances will be slightly longer.</span>
+</div>
+
+<div class="content">
+
+<!-- ══════════════════════════════════════ -->
+<!-- LIVE: MAP, JOURNAL & ADD-A-PLACE -->
+<!-- ══════════════════════════════════════ -->
+<div class="section-head" style="padding-top:32px;">
+  <div class="section-label">Live — built together, June 11–14</div>
+  <h2 class="section-title">Trip <em>map &amp; journal</em></h2>
+</div>
+
+<div class="whoami">
+  <span>Posting as <strong id="whoami-name">—</strong></span>
+  <button id="whoami-change" type="button">change</button>
+</div>
+
+<div id="map"></div>
+<div class="map-legend">
+  <span><i class="dot dot-rose"></i> Guide pins</span>
+  <span><i class="dot dot-sage"></i> Added by you</span>
+  <span><i class="dot dot-hotel"></i> Hotel</span>
+</div>
+
+<div class="add-place">
+  <div class="add-place-head">Add a place to the map</div>
+  <input type="text" id="place-input" placeholder="Paste a Google/Apple Maps link, or type a place name">
+  <textarea id="place-notes" rows="2" placeholder="Optional note — what is it, why add it"></textarea>
+  <button id="add-place-btn" type="button">Add to map</button>
+  <div id="add-place-status" class="add-place-status"></div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SECTION 1: NEIGHBOURHOOD (walk out the door) -->
+<!-- ══════════════════════════════════════ -->
+<div class="section-head">
+  <div class="section-label">Section I — your doorstep</div>
+  <h2 class="section-title">The 10th <em>arrondissement</em></h2>
+</div>
+
+<!-- PIN 1 -->
+<div class="pin" data-pin-id="1" data-pin-name="Porte Saint-Denis" data-lat="48.8681" data-lng="2.3543">
+  <div class="pin-left"><div class="pin-num c-sage">1</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Porte Saint-Denis</div>
+    <div class="pin-coords">
+      48.8681°N, 2.3543°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Porte+Saint-Denis+Paris&ll=48.8681,2.3543">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8681,2.3543">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">0.20 km from hotel — 3 min walk</span>
+      <span class="obscurity">★★☆☆☆ lesser-known</span>
+    </div>
+    <p class="pin-desc">A triumphal arch sitting in the middle of a busy boulevard, largely ignored by passers-by. Built in 1672 under Louis XIV to commemorate his military campaigns — specifically the crossing of the Rhine — it predates the Arc de Triomphe by 150 years and is considerably more detailed. The carvings cover the king's victories in Flanders and Holland. Its twin, the Porte Saint-Martin, is 200 metres further east.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      Louis XIV commissioned both arches to replace the medieval city gates that once stood here — the old northern entrance to Paris. At the time, Paris had been largely demolished and rebuilt to project the Sun King's glory. The Porte Saint-Denis was designed by François Blondel, the first director of the French Royal Academy of Architecture, who modelled it on the Arch of Titus in Rome. Most Parisians walk through it daily without looking up.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-gold">Sun King spectacle</span>
+      <span class="tag t-ink">on your doorstep</span>
+      <span class="tag t-sage">architecture</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 2 -->
+<div class="pin" data-pin-id="2" data-pin-name="Passage Brady" data-lat="48.8685" data-lng="2.3568">
+  <div class="pin-left"><div class="pin-num c-sage">2</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Passage Brady</div>
+    <div class="pin-coords">
+      48.8685°N, 2.3568°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Passage+Brady+Paris&ll=48.8685,2.3568">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8685,2.3568">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">0.29 km from hotel — 4 min walk</span>
+      <span class="obscurity">★★★☆☆ lesser-known</span>
+    </div>
+    <p class="pin-desc">One of the surviving covered passages of Paris, built in 1828 with iron-and-glass vaulting. What makes this one unusual is that it has been Paris's "Little India" since the 1970s — almost entirely filled with South Asian restaurants and spice shops. Walk through and the air shifts completely: cardamom, cumin, Bollywood music from restaurant doorways. A glass-covered 19th-century arcade carrying 21st-century diasporic Paris.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The covered passages were built in the early 19th century as the forerunners of shopping malls — sheltered spaces where Parisians could browse without being splashed by horse-drawn carriages. At their peak, Paris had over 150. Only around 20 survive. Brady is one of the few that still functions as a working neighbourhood rather than a tourist attraction. The building itself is unchanged since 1828; the community inside it has transformed completely.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-sage">covered passage</span>
+      <span class="tag t-ink">living neighbourhood</span>
+      <span class="tag t-gold">19th-century iron and glass</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 3 -->
+<div class="pin" data-pin-id="3" data-pin-name="Canal Saint-Martin" data-lat="48.8718" data-lng="2.3626">
+  <div class="pin-left"><div class="pin-num c-rose">3</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Canal Saint-Martin</div>
+    <div class="pin-coords">
+      48.8718°N, 2.3626°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Canal+Saint-Martin+Paris&ll=48.8718,2.3626">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8718,2.3626">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">0.72 km from hotel — 9 min walk</span>
+      <span class="obscurity">★★☆☆☆ known to those who look</span>
+    </div>
+    <p class="pin-desc">The canal running through the 10th is where Parisians actually go in the evenings — not tourists. Iron footbridges, tree-lined quays, locals with wine on the steps, concept stores and independent cafés tucked into the streets alongside Quai de Valmy. This is a completely different Paris from the postcard version. Walk it in the evening, when the light on the water and the sound of the locks is exactly what the Lana Del Rey song you're listening to needs as a backdrop.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The canal was commissioned by Napoleon in 1802 to bring fresh water into Paris — the Seine was chronically polluted — and completed in 1825 after his death. The stone-skipping scene in Amélie (2001) was filmed on these banks. The film caused such a surge of tourism to the canal that the neighbourhood gentrified almost entirely within a decade. The Amélie café at the start of the film, Café des Deux Moulins, is in Montmartre, not here — but the canal scenes are exactly where they appear to be.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-rose">Amélie connection</span>
+      <span class="tag t-sage">evening atmosphere</span>
+      <span class="tag t-ink">local Paris</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SECTION 2: GRANDS BOULEVARDS + PASSAGES -->
+<!-- ══════════════════════════════════════ -->
+<div class="section-head">
+  <div class="section-label">Section II — 15–20 min walk north and west</div>
+  <h2 class="section-title">Passages, <em>arcades</em> &amp; the Opéra</h2>
+</div>
+
+<!-- PIN 4 -->
+<div class="pin" data-pin-id="4" data-pin-name="Passage des Panoramas" data-lat="48.8706" data-lng="2.3439">
+  <div class="pin-left"><div class="pin-num c-gold">4</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Passage des Panoramas</div>
+    <div class="pin-coords">
+      48.8706°N, 2.3439°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Passage+des+Panoramas+Paris&ll=48.8706,2.3439">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8706,2.3439">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">0.69 km from hotel — 9 min walk</span>
+      <span class="obscurity">★★★☆☆ known to enthusiasts</span>
+    </div>
+    <p class="pin-desc">The oldest surviving covered passage in Paris, opened in 1800. Dark wood, faded shop fronts, antique dealers in stamp and postcard shops that look completely untouched since the 19th century. It's the least restored and most atmospheric of all the passages — scuffed floors, old gas-lamp fittings, a particular quality of diffused light through the glass ceiling. Several excellent small restaurants are tucked inside.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The passage was named after a pair of massive circular panorama paintings — entire cityscapes painted on the inside of cylindrical buildings at each end — that were among the biggest entertainment attractions in Paris in 1800. Visitors paid to stand in the centre and be completely surrounded by a painted Rome or London. The panorama buildings are gone but the passage's name preserves them. This was Paris's earliest experiment with total immersive visual experience, 200 years before IMAX.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-gold">oldest Paris passage</span>
+      <span class="tag t-ink">antiques</span>
+      <span class="tag t-rose">atmospheric</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 5 -->
+<div class="pin" data-pin-id="5" data-pin-name="Galerie Vivienne" data-lat="48.8667" data-lng="2.3397">
+  <div class="pin-left"><div class="pin-num c-gold">5</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Galerie Vivienne</div>
+    <div class="pin-coords">
+      48.8667°N, 2.3397°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Galerie+Vivienne+Paris&ll=48.8667,2.3397">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8667,2.3397">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.05 km from hotel — 13 min walk</span>
+      <span class="obscurity">★★☆☆☆ known gem</span>
+    </div>
+    <p class="pin-desc">The most beautiful of the surviving Paris passages — neoclassical vaulted glass ceiling, intricate mosaic floors, rotunda with gilding. Built in 1823, classified as a historic monument in 1974. Inside: an antiquarian bookshop open since 1826, a perfumery (Mad et Len at no. 27) making sculptural candles and pot pourri from centuries-old techniques, a wine merchant established in 1880, and a handful of fashion boutiques. Free to enter and wander at any time.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      At number 13, behind a gated entrance, a staircase leads to apartments once occupied by Eugène François Vidocq — the most extraordinary figure in French criminal history. A convicted criminal who became the founder of France's first national detective agency, the Sûreté, he was the real-life inspiration for both Valjean and Javert in Victor Hugo's Les Misérables. Hugo made one man into two characters because Vidocq was too contradictory to be believed as one.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-gold">covered passage</span>
+      <span class="tag t-rose">perfume — Mad et Len</span>
+      <span class="tag t-ink">bookshop since 1826</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 6 -->
+<div class="pin" data-pin-id="6" data-pin-name="Op&#233;ra Garnier (Palais Garnier)" data-lat="48.8719" data-lng="2.3316">
+  <div class="pin-left"><div class="pin-num c-lavender">6</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Opéra Garnier (Palais Garnier)</div>
+    <div class="pin-coords">
+      48.8719°N, 2.3316°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Opera+Garnier+Paris&ll=48.8719,2.3316">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8719,2.3316">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.60 km from hotel — 20 min walk or metro L4→Opéra (3 stops)</span>
+      <span class="obscurity">★☆☆☆☆ famous — but most visitors see only the outside</span>
+    </div>
+    <p class="pin-desc">One of the most overwhelming buildings in Paris — Napoleon III Baroque, gold-encrusted, absolutely maximum theatrical drama. The self-guided tour of the interior (no performance needed) includes the Grand Staircase, the Grand Foyer with its painted ceiling, and the auditorium with Marc Chagall's ceiling painting of 1964. The building is open every day; book tickets online. For someone who loves spectacle and fashion, the interior is one of the most extraordinary rooms in the world.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      In the fifth basement, ten metres below the stage, there is a real underground reservoir — built because architect Charles Garnier hit a hidden arm of the Seine during construction and could never drain it. He built a double foundation above it instead. The water still sits there today and is used by Paris firefighters to train for underwater rescues. Gaston Leroux used it as the Phantom's lake in his 1910 novel. The chandelier in the Phantom's famous scene was also inspired by reality: in 1896, a counterweight fell from the real chandelier and killed a woman in the audience.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-lavender">Phantom of the Opera</span>
+      <span class="tag t-gold">Napoleon III spectacle</span>
+      <span class="tag t-rose">Chagall ceiling</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 7 -->
+<div class="pin" data-pin-id="7" data-pin-name="Mus&#233;e Gustave Moreau" data-lat="48.8821" data-lng="2.3340">
+  <div class="pin-left"><div class="pin-num c-lavender">7</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Musée Gustave Moreau</div>
+    <div class="pin-coords">
+      48.8821°N, 2.3340°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Musee+Gustave+Moreau+Paris&ll=48.8821,2.3340">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8821,2.3340">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.97 km from hotel — metro L4 to Trinité (3 stops)</span>
+      <span class="obscurity">★★★★☆ genuinely obscure</span>
+    </div>
+    <p class="pin-desc">One of the strangest and most beautiful museums in Paris, and almost entirely unknown to tourists. Gustave Moreau was a Symbolist painter obsessed with mythology, jewels, colour, and extraordinary female figures — Salomé, Delilah, Galatea, Medusa. He converted his Paris townhouse into a museum and designed it himself before his death in 1898, with spiral staircases and double-height galleries to display thousands of works. The atmosphere is dark, theatrical, and unlike any other museum in the city.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      Moreau's most famous pupil was Henri Matisse. His second most famous pupil was Georges Rouault. Both became leaders of entirely different movements — Fauvism and Expressionism — and both credited Moreau's refusal to teach technique in favour of imagination as the thing that freed them. Moreau told his students: "I don't believe in what I touch or what I see. I only believe in what I do not see, and solely in what I feel." The museum he designed around himself is the most direct expression of that philosophy in Paris.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-lavender">Symbolism — mythology</span>
+      <span class="tag t-rose">dark and gorgeous</span>
+      <span class="tag t-ink">genuinely obscure</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- SECTION 3: PALAIS ROYAL + PERFUME -->
+<!-- ══════════════════════════════════════ -->
+<div class="section-head">
+  <div class="section-label">Section III — 1st arrondissement</div>
+  <h2 class="section-title">The Palais Royal &amp; <em>perfume</em></h2>
+</div>
+
+<!-- PIN 8 -->
+<div class="pin" data-pin-id="8" data-pin-name="Jardins du Palais Royal &amp; Colonnes de Buren" data-lat="48.8640" data-lng="2.3369">
+  <div class="pin-left"><div class="pin-num c-rose">8</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Jardins du Palais Royal &amp; Colonnes de Buren</div>
+    <div class="pin-coords">
+      48.8640°N, 2.3369°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Palais+Royal+Garden+Paris&ll=48.8640,2.3369">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8640,2.3369">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.37 km from hotel — 17 min walk or metro L4 to Palais Royal (2 stops)</span>
+      <span class="obscurity">★★☆☆☆ known to those who find it</span>
+    </div>
+    <p class="pin-desc">An enclosed garden in the centre of Paris that most tourists walk past without entering. Surrounded on all four sides by 18th-century arcades containing galleries, restaurants, and boutiques, with a courtyard filled with Daniel Buren's 1986 striped-column installation — 260 black-and-white columns of varying height covering the entire forecourt. The contrast between the Ancien Régime architecture and the minimalist columns is deliberately jarring and completely successful.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      On 12 July 1789 — two days before the storming of the Bastille — a journalist named Camille Desmoulins stood on a café table in these gardens and gave the speech that triggered the Revolution. He grabbed leaves from the surrounding trees and handed them out as green cockades for people to wear. Within 48 hours the Bastille had fallen. The gardens were chosen because censorship laws did not apply to the Palais Royal's private grounds. It was the only place in Paris where you could say what you wanted.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-sage">revolutionary history</span>
+      <span class="tag t-lavender">Buren columns</span>
+      <span class="tag t-gold">hidden arcades</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 9 -->
+<div class="pin" data-pin-id="9" data-pin-name="Serge Lutens &#8212; Les Salons du Palais Royal" data-lat="48.8638" data-lng="2.3370">
+  <div class="pin-left"><div class="pin-num c-rose">9</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Serge Lutens — Les Salons du Palais Royal</div>
+    <div class="pin-coords">
+      48.8638°N, 2.3370°E (Galerie de Valois, Palais Royal) &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Serge+Lutens+Palais+Royal+Paris&ll=48.8638,2.3370">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8638,2.3370">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.37 km from hotel (same complex as Palais Royal)</span>
+      <span class="obscurity">★★★★☆ known only to perfume initiates</span>
+    </div>
+    <p class="pin-desc">Inside the Palais Royal arcades, the most atmospheric perfume boutique in Paris — dark amethyst wood, ornate boiseries, a majestic central staircase, all designed by Lutens himself in 1992. The fragrances are literary and unusual: incense, rose, amber, tuberose, spices in combinations that smell like dark novels. Lana Del Rey atmospheric. Some fragrances — the Palais Royal exclusives — are only sold here, nowhere else in the world. Open Mon–Sat, 10am–7pm.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      Serge Lutens began his career as a photographer at Vogue Paris, then spent decades as creative director at Christian Dior and Shiseido before creating his own house. His most famous fragrance, Tubéreuse Criminelle (Criminal Tuberose), was considered unwearable when it launched — it opens with a sharp petroleum note before resolving into flowers. It now has a cult following. The name is not a metaphor: he believes beauty should be slightly dangerous.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-rose">perfume — exclusives</span>
+      <span class="tag t-lavender">dark and atmospheric</span>
+      <span class="tag t-ink">Lana Del Rey coded</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- SECTION 4: ÎLE DE LA CITÉ + SAINTE-CHAPELLE -->
+<!-- ══════════════════════════════════════ -->
+<div class="section-head">
+  <div class="section-label">Section IV — Île de la Cité</div>
+  <h2 class="section-title">Glass, stone &amp; <em>sacred light</em></h2>
+</div>
+
+<!-- PIN 10 -->
+<div class="pin" data-pin-id="10" data-pin-name="March&#233; aux Fleurs Reine Elizabeth II" data-lat="48.8551" data-lng="2.3469">
+  <div class="pin-left"><div class="pin-num c-lavender">10</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Marché aux Fleurs Reine Elizabeth II</div>
+    <div class="pin-coords">
+      48.8551°N, 2.3469°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Marche+aux+Fleurs+Paris&ll=48.8551,2.3469">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8551,2.3469">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.70 km from hotel — metro L4 to Cité (3 stops)</span>
+      <span class="obscurity">★★☆☆☆ known but undervisited</span>
+    </div>
+    <p class="pin-desc">The oldest flower market in Paris, operating on this spot since 1808 — right next to Sainte-Chapelle on the Île de la Cité. Iron-and-glass pavilions filled with flowers, orchids, exotic plants, seeds, garden supplies. On Sundays it becomes a bird market as well. Entirely surrounded by the 19th-century iron vaulting; the scent when you walk in is extraordinary. This is the logical start to a Sainte-Chapelle morning.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The market was renamed for Queen Elizabeth II in 2014 following her state visit to France — one of very few public spaces in Paris named for a foreign head of state. The flower sellers have occupied this spot through the Revolution, two World Wars, and the Occupation. When the city tried to relocate them in the early 19th century they refused and won. The market's survival is partly attributed to the fact that Parisians considered flowers a basic necessity, not a luxury.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-sage">flower market since 1808</span>
+      <span class="tag t-gold">iron-and-glass pavilions</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 11 -->
+<div class="pin" data-pin-id="11" data-pin-name="Sainte-Chapelle" data-lat="48.8554" data-lng="2.3450">
+  <div class="pin-left"><div class="pin-num c-lavender">11</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Sainte-Chapelle</div>
+    <div class="pin-coords">
+      48.8554°N, 2.3450°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Sainte-Chapelle+Paris&ll=48.8554,2.3450">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8554,2.3450">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.71 km from hotel — metro L4 to Cité</span>
+      <span class="obscurity">★☆☆☆☆ famous — but nothing prepares you</span>
+    </div>
+    <p class="pin-desc">Go in the morning when the light comes in from the east. The upper chapel is fifteen panels of stained glass covering almost every surface — 1,113 biblical scenes in blue, red, and gold, completed in 1248. It is one of the few medieval buildings that makes visitors physically stop. Book timed entry online in advance; the queues without tickets are brutal. The lower chapel is free and also beautiful, but the upper chapel is the reason you're here.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      Louis IX built Sainte-Chapelle as a reliquary for the Crown of Thorns, which he purchased from the Emperor of Constantinople in 1239. He paid three times more for the relic than for the chapel to house it. The building is essentially a jewel box designed to dissolve the walls and replace them with light — the architectural thesis being that the closer you come to the divine, the more solid matter becomes pure radiance. The Crown of Thorns is now in Notre-Dame, five minutes away.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-lavender">stained glass — 1248</span>
+      <span class="tag t-gold">Crown of Thorns connection</span>
+      <span class="tag t-rose">book in advance</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 12 -->
+<div class="pin" data-pin-id="12" data-pin-name="Notre-Dame de Paris" data-lat="48.8530" data-lng="2.3499">
+  <div class="pin-left"><div class="pin-num c-lavender">12</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Notre-Dame de Paris</div>
+    <div class="pin-coords">
+      48.8530°N, 2.3499°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Notre+Dame+Paris&ll=48.8530,2.3499">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8530,2.3499">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.88 km from hotel — 3 min walk from Sainte-Chapelle</span>
+      <span class="obscurity">★☆☆☆☆ famous — recently restored</span>
+    </div>
+    <p class="pin-desc">Reopened in December 2024 after the 2019 fire. The restoration is extraordinary — the interior is now cleaner and brighter than it has been in centuries. Most visitors are struck by how different it looks from before. Free entry with timed tickets (book online); expect queues. After Sainte-Chapelle you'll be in exactly the right frame of mind — both buildings are about what happens when medieval builders decided light itself was the point.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The famous gargoyles are not medieval. Almost all of them were added in the 1840s by architect Eugène Viollet-le-Duc, who had a taste for gothic drama that exceeded the original builders'. Victor Hugo's Hunchback of Notre-Dame (1831) was published specifically to save the cathedral from demolition — it was derelict and scheduled to be torn down. The novel caused such a surge of public sentiment that the restoration project was funded instead. Hugo literally wrote a building back into existence.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-lavender">medieval gothic</span>
+      <span class="tag t-rose">Hunchback of Notre-Dame</span>
+      <span class="tag t-ink">just restored</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- SECTION 5: LEFT BANK -->
+<!-- ══════════════════════════════════════ -->
+<div class="section-head">
+  <div class="section-label">Section V — Left Bank</div>
+  <h2 class="section-title">Bookshops, ice cream &amp; <em>impressionist light</em></h2>
+</div>
+
+<!-- PIN 13 -->
+<div class="pin" data-pin-id="13" data-pin-name="Berthillon &#8212; &#206;le Saint-Louis" data-lat="48.8517" data-lng="2.3545">
+  <div class="pin-left"><div class="pin-num c-ink">13</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Berthillon — Île Saint-Louis</div>
+    <div class="pin-coords">
+      48.8517°N, 2.3545°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Berthillon+Paris+Ile+Saint+Louis&ll=48.8517,2.3545">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8517,2.3545">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.95 km from hotel — 5 min walk from Notre-Dame</span>
+      <span class="obscurity">★★☆☆☆ known — queue is worth it</span>
+    </div>
+    <p class="pin-desc">The most famous ice cream in Paris, made on Île Saint-Louis since 1954. Salted caramel, wild strawberry, blackcurrant sorbet, chestnut. The island itself — a five-minute walk from Notre-Dame across a small bridge — is one of the quietest and most beautiful spots in the entire city: one street running its length, 17th-century townhouses, almost no traffic. Buy ice cream and eat it walking around the island.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      Île Saint-Louis was not developed until the 17th century, and the residents then were almost entirely the aristocracy — which means many of the buildings are still intact from that period, unchanged. The island was briefly home to Marie Curie, who lived at 36 Quai de Béthune from 1912 until her death in 1934. The plaque on the building is modest to the point of embarrassment for the only person to win Nobel Prizes in two different sciences.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-gold">best ice cream in Paris</span>
+      <span class="tag t-sage">Marie Curie lived here</span>
+      <span class="tag t-rose">Île Saint-Louis</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 14 -->
+<div class="pin" data-pin-id="14" data-pin-name="Bouquinistes of the Seine" data-lat="48.8538" data-lng="2.3461">
+  <div class="pin-left"><div class="pin-num c-ink">14</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Bouquinistes of the Seine</div>
+    <div class="pin-coords">
+      48.8538°N, 2.3461°E (Quai de la Tournelle) &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Bouquinistes+Seine+Paris&ll=48.8538,2.3461">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8538,2.3461">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.90 km from hotel — stretch along both banks of the Seine</span>
+      <span class="obscurity">★★☆☆☆ famous but underused</span>
+    </div>
+    <p class="pin-desc">The green wooden boxes bolted to the riverside walls have been here in some form since the 16th century. Old paperbacks, vintage prints, antique postcards, fashion plates, maps, film posters. The Left Bank stretch between Pont Neuf and Pont de l'Archevêché is the most atmospheric. This is not shopping — it is slow looking. Find something you wouldn't have found anywhere else. Old French fashion illustration plates from the 18th and 19th centuries turn up here for a few euros.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The bouquinistes were originally itinerant sellers who were repeatedly banned by royal decree for selling subversive pamphlets and protestant books. They kept coming back. Louis XVI finally legalised them in 1789 — the same year the Revolution began, which they had arguably been helping to incubate for two centuries. There are currently 240 authorised bouquinistes along the Seine with around 900 green boxes. UNESCO lists them as part of the intangible cultural heritage of Paris.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-ink">books and prints since 1500s</span>
+      <span class="tag t-gold">vintage fashion plates</span>
+      <span class="tag t-rose">UNESCO heritage</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 15 -->
+<div class="pin" data-pin-id="15" data-pin-name="Shakespeare and Company" data-lat="48.8527" data-lng="2.3473">
+  <div class="pin-left"><div class="pin-num c-ink">15</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Shakespeare and Company</div>
+    <div class="pin-coords">
+      48.8527°N, 2.3473°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Shakespeare+and+Company+Paris&ll=48.8527,2.3473">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8527,2.3473">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.95 km from hotel — same block as Notre-Dame</span>
+      <span class="obscurity">★☆☆☆☆ famous — still entirely worth it</span>
+    </div>
+    <p class="pin-desc">The most famous English-language bookshop in the world, facing Notre-Dame on the Left Bank. Three floors of atmospheric chaos — shelves on every surface, a reading library upstairs where you can sit and read for free, a small piano. Hemingway, Fitzgerald, James Baldwin, Henry Miller, Anaïs Nin all passed through. The attached Shakespeare and Company café next door serves excellent coffee and is much easier to sit in quietly than the shop itself.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The shop has a tradition called "Tumbleweeds" — broke writers who sleep among the stacks in exchange for working a few hours a day and reading a book a day. Over the decades, thousands of people have slept here. Small beds are tucked among the shelves on the upper floors. Guests are asked to write their name, age, and a short autobiography, which goes into the shop's archive. Jeff Buckley recorded his first demo tape in Paris and spent time in Left Bank bookshops and cafés exactly like this one during his years here in the early 1990s.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-ink">bookshop</span>
+      <span class="tag t-rose">Jeff Buckley / Paris connection</span>
+      <span class="tag t-gold">sleeping writers upstairs</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 16 -->
+<div class="pin" data-pin-id="16" data-pin-name="Mus&#233;e d'Orsay" data-lat="48.8600" data-lng="2.3266">
+  <div class="pin-left"><div class="pin-num c-lavender">16</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Musée d'Orsay</div>
+    <div class="pin-coords">
+      48.8600°N, 2.3266°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Musee+d+Orsay+Paris&ll=48.8600,2.3266">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8600,2.3266">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">2.24 km from hotel — metro L4 to Saint-Michel then walk, or RER C to Musée d'Orsay</span>
+      <span class="obscurity">★☆☆☆☆ famous — but the specific rooms matter</span>
+    </div>
+    <p class="pin-desc">The world's greatest Impressionist collection, inside a converted 1900 railway station — the building itself is part of the art. Monet, Renoir, Degas, Cézanne, Van Gogh. Book timed entry online. Go to the top floor first (Room 35): Van Gogh's Bedroom in Arles and self-portraits, then Monet's series of the Rouen Cathedral painted at different times of day — the same building over and over to show how light transforms everything. That wall is the entire philosophy of Impressionism in one place.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The famous clock face visible from inside the museum — one of the station's original iron-and-glass clock mechanisms — was the model for the opening of Hugo Cabret (and the Scorsese film Hugo). The building was scheduled for demolition in 1970. It was saved partly through the advocacy of a group that included Orson Welles. The railway platforms are still underneath: if you look closely at the architecture of the main hall, you can see exactly where the tracks used to run.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-lavender">Impressionism</span>
+      <span class="tag t-gold">Van Gogh + Monet</span>
+      <span class="tag t-ink">railway station — book ahead</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- SECTION 6: LE MARAIS -->
+<!-- ══════════════════════════════════════ -->
+<div class="section-head">
+  <div class="section-label">Section VI — Le Marais</div>
+  <h2 class="section-title">Shopping, stationery &amp; <em>the oldest square in Paris</em></h2>
+</div>
+
+<!-- PIN 17 -->
+<div class="pin" data-pin-id="17" data-pin-name="Place des Vosges" data-lat="48.8554" data-lng="2.3625">
+  <div class="pin-left"><div class="pin-num c-gold">17</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Place des Vosges</div>
+    <div class="pin-coords">
+      48.8554°N, 2.3625°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Place+des+Vosges+Paris&ll=48.8554,2.3625">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8554,2.3625">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.74 km from hotel — 22 min walk or metro L4 to Saint-Paul (2 stops)</span>
+      <span class="obscurity">★★☆☆☆ known — the specifics are not</span>
+    </div>
+    <p class="pin-desc">The oldest planned square in Paris, completed in 1612 under Henri IV — 36 matching townhouses with arcaded ground floors surrounding a central garden. It's the direct model for every elegant European square that followed: Covent Garden in London, the Borghese gardens in Rome. Victor Hugo lived here for sixteen years at number 6, now a free museum. The arcades contain galleries, cafés, and an extraordinary chocolate shop (Carré des Vosges) in the corner.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      Before becoming Place des Vosges, this was the site of the Hôtel des Tournelles — a royal palace where Henri II died in a jousting tournament in 1559. His widow, Catherine de Medici, was so distraught that she had the entire palace demolished. The square was built on the ruins. Henri IV designed it as a space for duelling — the aristocracy had been fighting in the streets and he wanted to contain the practice. His attempt did not succeed.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-gold">oldest square — 1612</span>
+      <span class="tag t-rose">Victor Hugo's apartment</span>
+      <span class="tag t-ink">Bridgerton-adjacent architecture</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 18 -->
+<div class="pin" data-pin-id="18" data-pin-name="March&#233; des Enfants Rouges" data-lat="48.8621" data-lng="2.3618">
+  <div class="pin-left"><div class="pin-num c-gold">18</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Marché des Enfants Rouges</div>
+    <div class="pin-coords">
+      48.8621°N, 2.3618°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Marche+des+Enfants+Rouges+Paris&ll=48.8621,2.3618">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8621,2.3618">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.06 km from hotel — 13 min walk</span>
+      <span class="obscurity">★★★☆☆ genuinely lesser-known</span>
+    </div>
+    <p class="pin-desc">The oldest covered market in Paris, built in 1615, tucked down Rue de Bretagne in the Marais. Food stalls from around the world under iron-and-glass vaulting: Moroccan, Japanese, Creole, Lebanese, French. Fresh flowers from the florist inside. Open Tue–Sat 9am–7:30pm, Sun 9am–5pm. The morning is calmer; midday gets busy with locals eating lunch at the communal tables. An excellent Sunday morning stop before heading to Sainte-Chapelle.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      "Enfants Rouges" — red children — refers to the orphans of a charitable hospice that stood on this spot in the 16th century, who wore red uniforms. The market was eventually built to replace it. The name has survived four centuries, two Revolutions, two World Wars, and Haussmann's demolition of most of the rest of the neighbourhood. The building itself is one of the few structures in central Paris predating Louis XIV.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-gold">oldest market — 1615</span>
+      <span class="tag t-sage">flowers inside</span>
+      <span class="tag t-ink">Sunday morning</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 19 -->
+<div class="pin" data-pin-id="19" data-pin-name="Papier Tigre + Marais boutique trail" data-lat="48.8626" data-lng="2.3614">
+  <div class="pin-left"><div class="pin-num c-gold">19</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Papier Tigre + Marais boutique trail</div>
+    <div class="pin-coords">
+      48.8626°N, 2.3614°E (Papier Tigre, Rue des Filles du Calvaire) &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Papier+Tigre+Paris&ll=48.8626,2.3614">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8626,2.3614">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">1.00 km from hotel — 13 min walk via Rue du Temple</span>
+      <span class="obscurity">★★★☆☆ known to the right people</span>
+    </div>
+    <p class="pin-desc">Papier Tigre is a French stationery and graphic design studio — everything designed in Paris and printed locally. Notebooks, cards, art prints, pencil cases in clean, bold graphic design. It anchors a stretch of independent boutiques in the upper Marais (Rue des Filles du Calvaire, Rue de Bretagne) that includes concept stores, small fashion labels, and the kind of shops that feel like a discovery rather than a destination. The Marais has more independent retail than anywhere else in central Paris.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The Marais was the Jewish quarter of Paris from the 13th century until the Second World War. Rue des Rosiers, two minutes from here, still has the oldest Jewish bakeries and delis in the city. During the Occupation, 13,000 Jews were arrested in the Vél d'Hiv roundup of July 1942, almost all from this neighbourhood. The area's survival as a distinct community is itself a form of quiet persistence. The Mémorial de la Shoah is at 17 Rue Geoffroy l'Asnier, 300 metres from Place des Vosges, if you want to acknowledge that history.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-rose">stationery + art supplies</span>
+      <span class="tag t-ink">concept stores</span>
+      <span class="tag t-gold">Marais boutique trail</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 20 -->
+<div class="pin" data-pin-id="20" data-pin-name="Jardin des Tuileries &#8212; late afternoon" data-lat="48.8638" data-lng="2.3264">
+  <div class="pin-left"><div class="pin-num c-rose">20</div><div class="pin-vline"></div></div>
+  <div class="pin-right">
+    <div class="pin-name">Jardin des Tuileries — late afternoon</div>
+    <div class="pin-coords">
+      48.8638°N, 2.3264°E &nbsp;·&nbsp;
+      <a href="https://maps.apple.com/?q=Jardin+des+Tuileries+Paris&ll=48.8638,2.3264">Apple Maps</a> &nbsp;·&nbsp;
+      <a href="https://www.google.com/maps/search/?api=1&query=48.8638,2.3264">Google Maps</a>
+    </div>
+    <div class="pin-meta-row">
+      <span class="pin-dist">2.08 km from hotel — metro L1 to Tuileries (from Châtelet, 2 stops)</span>
+      <span class="obscurity">★☆☆☆☆ famous — best at golden hour</span>
+    </div>
+    <p class="pin-desc">The formal gardens between the Louvre and the Place de la Concorde, running along the Seine. Come at 6 or 7pm in June, when the light is exactly the soft golden quality you find in Renoir and Monet — because they painted it here. Fountains, classical sculpture, long gravel alleys of chestnut trees. The Eiffel Tower is visible in the distance from the western end. This is the Impressionist painting you've been looking at, except you're standing in it.</p>
+    <div class="egg">
+      <strong>Easter egg</strong>
+      The garden was originally the grounds of the Tuileries Palace — the principal royal residence in Paris until Versailles was completed. After the Revolution, Louis XVI and Marie Antoinette were held here under house arrest before their execution. The palace itself was burned by the Paris Commune in 1871 and demolished completely in 1882. The garden is its entire surviving trace. The statues standing in the alleys are the remnants of the palace collection, placed outside when there was no longer an inside.
+    </div>
+    <div class="pin-tags">
+      <span class="tag t-lavender">Impressionist light — go at 6pm</span>
+      <span class="tag t-rose">Marie Antoinette connection</span>
+      <span class="tag t-gold">palace that no longer exists</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- SECTION VII: ADDED DURING THE TRIP -->
+<!-- ══════════════════════════════════════ -->
+<div class="section-head" id="added-pins-head" hidden>
+  <div class="section-label">Section VII — added by you</div>
+  <h2 class="section-title">Found along the <em>way</em></h2>
+</div>
+<div id="added-pins"></div>
+
+
+<!-- FOOD NOTES -->
+<div class="food-card" style="margin-top:40px;">
+  <div class="food-head">Food notes — the essential Paris list</div>
+  <strong>Croissant ritual:</strong> Any boulangerie, 8am, straight from the oven. Ask for "un croissant au beurre" — the straight ones are always made with real butter. Eat standing at the counter.<br><br>
+  <strong>Macarons:</strong> Ladurée (75 Champs-Élysées — metro L1 to Franklin Roosevelt) invented the Parisian macaron in 1862. The shop itself is reason to go. Pierre Hermé (4 Rue de Bretagne, Marais — practically next door to Enfants Rouges) is more adventurous: olive oil and vanilla, rose and lychee, cassis and violet.<br><br>
+  <strong>Street crêpes:</strong> Any street stand near the Île de la Cité or Latin Quarter. Classic: beurre-sucre (butter and sugar). Or citron-sucre (lemon and sugar). Eat while walking.<br><br>
+  <strong>Café ritual:</strong> Find any café that looks right and order a café crème or a citron pressé (freshly squeezed lemon juice — you add water and sugar yourself). Sit for at least an hour. This is not optional.<br><br>
+  <strong>Canal dinner:</strong> Rue de Marseille and Quai de Valmy, five minutes from the hotel — neighbourhood restaurants at all price ranges, with canal views. The best Paris meal is often the casual local one.
+</div>
+
+
+<!-- PRACTICAL BOX -->
+<div class="practical">
+  <h3>Before you go</h3>
+  <div class="prac-grid">
+    <div class="prac-item"><span>Book in advance</span>Sainte-Chapelle, Notre-Dame, Musée d'Orsay, and Opéra Garnier all have timed entry. Do it now. The queues without tickets can be 1–2 hours.</div>
+    <div class="prac-item"><span>Metro</span>Château d'Eau (3 min walk) → Ligne 4 → everything on the Right Bank and Île de la Cité. Line 1 (from Châtelet) → Louvre, Tuileries, Opéra. Single tickets or Navigo Easy card.</div>
+    <div class="prac-item"><span>Language</span>"Bonjour, parlez-vous anglais?" before switching to English. "Merci" and "s'il vous plaît" are noticed and appreciated more than most visitors expect.</div>
+    <div class="prac-item"><span>Cash</span>Bouquinistes and market stalls are cash only. Keep €20–30. Everything else takes cards.</div>
+    <div class="prac-item"><span>Serge Lutens</span>Open Mon–Sat only — plan accordingly. No appointment needed to browse. The exclusives (only sold here) include Tubéreuse Criminelle, La Fille de Berlin, and Féminité du Bois.</div>
+    <div class="prac-item"><span>Eiffel Tower</span>Not on this guide — but from the Trocadéro (free, 20 min metro from hotel) it sparkles on the hour every evening after dark. That view is better than the queue anyway.</div>
+  </div>
+</div>
+
+
+<!-- REFERENCE TABLE -->
+<div class="ref-table-section">
+  <h3>Quick reference</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Location</th>
+        <th>GPS</th>
+        <th>Dist.</th>
+        <th>Theme</th>
+        <th>Obscurity</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Porte Saint-Denis</td><td>48.8681, 2.3543</td><td>0.20 km</td><td>Sun King, architecture</td><td>★★☆☆☆</td></tr>
+      <tr><td>2</td><td>Passage Brady</td><td>48.8685, 2.3568</td><td>0.29 km</td><td>Covered passage, diaspora</td><td>★★★☆☆</td></tr>
+      <tr><td>3</td><td>Canal Saint-Martin</td><td>48.8718, 2.3626</td><td>0.72 km</td><td>Neighbourhood, Amélie</td><td>★★☆☆☆</td></tr>
+      <tr><td>4</td><td>Passage des Panoramas</td><td>48.8706, 2.3439</td><td>0.69 km</td><td>Oldest passage, antiques</td><td>★★★☆☆</td></tr>
+      <tr><td>5</td><td>Galerie Vivienne</td><td>48.8667, 2.3397</td><td>1.05 km</td><td>Passage, perfume, bookshop</td><td>★★☆☆☆</td></tr>
+      <tr><td>6</td><td>Opéra Garnier</td><td>48.8719, 2.3316</td><td>1.60 km</td><td>Phantom, spectacle, Chagall</td><td>★☆☆☆☆</td></tr>
+      <tr><td>7</td><td>Musée Gustave Moreau</td><td>48.8821, 2.3340</td><td>1.97 km</td><td>Symbolism, mythology, dark</td><td>★★★★☆</td></tr>
+      <tr><td>8</td><td>Palais Royal Gardens</td><td>48.8640, 2.3369</td><td>1.37 km</td><td>Revolution, Buren columns</td><td>★★☆☆☆</td></tr>
+      <tr><td>9</td><td>Serge Lutens (Palais Royal)</td><td>48.8638, 2.3370</td><td>1.37 km</td><td>Perfume — exclusives only here</td><td>★★★★☆</td></tr>
+      <tr><td>10</td><td>Marché aux Fleurs</td><td>48.8551, 2.3469</td><td>1.70 km</td><td>Flower market since 1808</td><td>★★☆☆☆</td></tr>
+      <tr><td>11</td><td>Sainte-Chapelle</td><td>48.8554, 2.3450</td><td>1.71 km</td><td>Stained glass — 1248</td><td>★☆☆☆☆</td></tr>
+      <tr><td>12</td><td>Notre-Dame</td><td>48.8530, 2.3499</td><td>1.88 km</td><td>Gothic, restored 2024</td><td>★☆☆☆☆</td></tr>
+      <tr><td>13</td><td>Berthillon, Île Saint-Louis</td><td>48.8517, 2.3545</td><td>1.95 km</td><td>Best ice cream, Marie Curie</td><td>★★☆☆☆</td></tr>
+      <tr><td>14</td><td>Bouquinistes of the Seine</td><td>48.8538, 2.3461</td><td>1.90 km</td><td>Books, prints, fashion plates</td><td>★★☆☆☆</td></tr>
+      <tr><td>15</td><td>Shakespeare and Company</td><td>48.8527, 2.3473</td><td>1.95 km</td><td>Bookshop, Jeff Buckley</td><td>★☆☆☆☆</td></tr>
+      <tr><td>16</td><td>Musée d'Orsay</td><td>48.8600, 2.3266</td><td>2.24 km</td><td>Impressionism — book ahead</td><td>★☆☆☆☆</td></tr>
+      <tr><td>17</td><td>Place des Vosges</td><td>48.8554, 2.3625</td><td>1.74 km</td><td>Oldest square, Victor Hugo</td><td>★★☆☆☆</td></tr>
+      <tr><td>18</td><td>Marché des Enfants Rouges</td><td>48.8621, 2.3618</td><td>1.06 km</td><td>Oldest market — 1615</td><td>★★★☆☆</td></tr>
+      <tr><td>19</td><td>Papier Tigre + Marais trail</td><td>48.8626, 2.3614</td><td>1.00 km</td><td>Stationery, boutiques</td><td>★★★☆☆</td></tr>
+      <tr><td>20</td><td>Jardin des Tuileries (6pm)</td><td>48.8638, 2.3264</td><td>2.08 km</td><td>Impressionist light at dusk</td><td>★☆☆☆☆</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div><!-- /content -->
+
+<!-- IDENTITY MODAL -->
+<div class="modal-overlay" id="identity-modal" hidden>
+  <div class="modal-box">
+    <h3>Who's posting?</h3>
+    <p>Remembered on this device only.</p>
+    <div class="identity-choices">
+      <button class="identity-choice" data-name="Francesca" type="button">Francesca</button>
+      <button class="identity-choice" data-name="Dad" type="button">Dad</button>
+    </div>
+    <div class="identity-other">
+      <input type="text" id="identity-other-input" placeholder="Or type a name">
+      <button id="identity-other-btn" type="button">Use</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" hidden>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
