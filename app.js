@@ -54,11 +54,7 @@ function setIdentity(name) {
 function ensureIdentity() {
   const name = getIdentity();
   const label = document.getElementById("whoami-name");
-  if (name && label) {
-    label.textContent = name;
-  } else {
-    showIdentityModal();
-  }
+  if (label) label.textContent = name || "—";
 }
 
 function showIdentityModal() {
@@ -69,23 +65,40 @@ function hideIdentityModal() {
   document.getElementById("identity-modal").hidden = true;
 }
 
+// If no identity is set yet, show the "who's posting?" modal and run
+// `action` once one is chosen. Otherwise run `action` immediately.
+let pendingIdentityAction = null;
+
+function requireIdentity(action) {
+  if (getIdentity()) {
+    action();
+  } else {
+    pendingIdentityAction = action;
+    showIdentityModal();
+  }
+}
+
+function resolveIdentity(name) {
+  setIdentity(name);
+  hideIdentityModal();
+  const action = pendingIdentityAction;
+  pendingIdentityAction = null;
+  if (action) action();
+}
+
 function initIdentityModal() {
   document.getElementById("whoami-change").addEventListener("click", showIdentityModal);
 
   document.querySelectorAll(".identity-choice").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      setIdentity(btn.dataset.name);
-      hideIdentityModal();
-    });
+    btn.addEventListener("click", () => resolveIdentity(btn.dataset.name));
   });
 
   document.getElementById("identity-other-btn").addEventListener("click", () => {
     const input = document.getElementById("identity-other-input");
     const val = input.value.trim();
     if (val) {
-      setIdentity(val);
       input.value = "";
-      hideIdentityModal();
+      resolveIdentity(val);
     }
   });
 }
@@ -235,7 +248,7 @@ async function postComment(pinId, pinName, journalEl, form) {
 
   const author = getIdentity();
   if (!author) {
-    showIdentityModal();
+    requireIdentity(() => postComment(pinId, pinName, journalEl, form));
     return;
   }
 
@@ -422,7 +435,7 @@ async function geocode(query) {
 }
 
 function initAddPlace() {
-  document.getElementById("add-place-btn").addEventListener("click", async () => {
+  async function submitAddPlace() {
     const input = document.getElementById("place-input");
     const notesEl = document.getElementById("place-notes");
     const status = document.getElementById("add-place-status");
@@ -431,7 +444,7 @@ function initAddPlace() {
 
     const author = getIdentity();
     if (!author) {
-      showIdentityModal();
+      requireIdentity(submitAddPlace);
       return;
     }
     if (!supabaseClient) {
@@ -492,7 +505,9 @@ function initAddPlace() {
       status.textContent = "Something went wrong. Check your connection and try again.";
       status.className = "add-place-status error";
     }
-  });
+  }
+
+  document.getElementById("add-place-btn").addEventListener("click", submitAddPlace);
 }
 
 // ───────────────────────── realtime ─────────────────────────
