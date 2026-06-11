@@ -164,7 +164,7 @@ function buildJournalUI(pinEl, pinId, pinName) {
       <div class="journal-entries"><div class="journal-empty">Loading…</div></div>
       <form class="journal-form">
         <textarea rows="2" placeholder="Add a note…"></textarea>
-        <input type="file" accept="image/*" capture="environment">
+        <input type="file" accept="image/*">
         <button type="submit">Post</button>
       </form>
     </div>
