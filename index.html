@@ -21,6 +21,10 @@
     --white: #ffffff;
   }
 
+  html, body {
+    overflow-x: hidden;
+  }
+
   body {
     background: var(--cream);
     color: var(--ink);
@@ -313,6 +317,11 @@
     font-weight: 400;
     margin-bottom: 16px;
   }
+  .table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   table {
     width: 100%;
     border-collapse: collapse;
@@ -455,8 +464,15 @@
   .add-place button:disabled, .journal-form button:disabled { opacity: 0.5; cursor: default; }
 
   .add-place-status { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.6; min-height: 1.6em; }
-  .add-place-status.error   { color: var(--rose); }
-  .add-place-status.success { color: var(--sage); }
+  .add-place-status.error,
+  .add-place-status.success {
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-top: 10px;
+  }
+  .add-place-status.error   { color: var(--rose); background: rgba(184, 106, 106, 0.1); }
+  .add-place-status.success { color: var(--sage); background: rgba(94, 140, 118, 0.1); }
 
   /* ─── JOURNAL / COMMENTS ─── */
   .journal { margin-top: 16px; border-top: 1px dashed var(--faint); padding-top: 12px; }
@@ -1241,6 +1257,7 @@
 <!-- REFERENCE TABLE -->
 <div class="ref-table-section">
   <h3>Quick reference</h3>
+  <div class="table-scroll">
   <table>
     <thead>
       <tr>
@@ -1275,6 +1292,7 @@
       <tr><td>20</td><td>Jardin des Tuileries (6pm)</td><td>48.8638, 2.3264</td><td>2.08 km</td><td>Impressionist light at dusk</td><td>★☆☆☆☆</td></tr>
     </tbody>
   </table>
+  </div>
 </div>
 
 </div><!-- /content -->
@@ -1302,7 +1320,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script src="config.js?v=2"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>

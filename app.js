@@ -435,10 +435,15 @@ async function geocode(query) {
 }
 
 function initAddPlace() {
+  // Recognized "share" link formats that don't carry coordinates and can't
+  // be resolved client-side (no server to follow the redirect).
+  const SHORT_LINK_RE = /(maps\.app\.goo\.gl|goo\.gl\/maps|maps\.apple\.com\/p\/|maps\.apple\/p\/|g\.co\/)/i;
+
   async function submitAddPlace() {
     const input = document.getElementById("place-input");
     const notesEl = document.getElementById("place-notes");
     const status = document.getElementById("add-place-status");
+    const btn = document.getElementById("add-place-btn");
     const raw = input.value.trim();
     if (!raw) return;
 
@@ -452,6 +457,7 @@ function initAddPlace() {
       return;
     }
 
+    btn.disabled = true;
     status.textContent = "Looking that up…";
     status.className = "add-place-status";
 
@@ -463,9 +469,16 @@ function initAddPlace() {
       if (looksLikeUrl) {
         coords = extractLatLngFromUrl(raw);
         name = extractNameFromUrl(raw);
+
+        // No coordinates in the URL itself, but a place name was — geocode that.
+        if (!coords && name) {
+          coords = await geocode(name + ", Paris");
+        }
+
         if (!coords) {
-          status.textContent =
-            "Couldn't read coordinates from that link. Try a full Google Maps link (one with @lat,lng in it), or just type the place name instead.";
+          status.textContent = SHORT_LINK_RE.test(raw)
+            ? "That's a shortened map link, which can't be read here. In Maps, tap Share → Copy Address (not Copy Link), or just type the place name below."
+            : "Couldn't read coordinates from that link. Try a full Google Maps link (one with @lat,lng in it), or just type the place name instead.";
           status.className = "add-place-status error";
           return;
         }
@@ -504,6 +517,8 @@ function initAddPlace() {
       console.error(err);
       status.textContent = "Something went wrong. Check your connection and try again.";
       status.className = "add-place-status error";
+    } finally {
+      btn.disabled = false;
     }
   }
 
