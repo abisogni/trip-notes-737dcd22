@@ -423,6 +423,16 @@ function extractNameFromUrl(text) {
   }
 }
 
+// Pulls a "[Place Name]" override out of the input, e.g.
+// "63 Rue Galande, 75005 Paris [Chanceux]" — used to geocode/locate by the
+// address or link while saving the pin under the bracketed name.
+function extractBracketName(text) {
+  const m = text.match(/\[([^\]]+)\]/);
+  if (!m) return { name: null, rest: text };
+  const rest = (text.slice(0, m.index) + text.slice(m.index + m[0].length)).trim();
+  return { name: m[1].trim(), rest };
+}
+
 async function geocode(query) {
   const url =
     "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1" +
@@ -462,21 +472,28 @@ function initAddPlace() {
     status.className = "add-place-status";
 
     try {
-      const looksLikeUrl = /^https?:\/\//i.test(raw);
+      const { name: nameOverride, rest } = extractBracketName(raw);
+      const query = rest || nameOverride || raw;
+      const looksLikeUrl = /^https?:\/\//i.test(query);
       let coords = null;
       let name = null;
 
       if (looksLikeUrl) {
-        coords = extractLatLngFromUrl(raw);
-        name = extractNameFromUrl(raw);
+        coords = extractLatLngFromUrl(query);
+        name = extractNameFromUrl(query);
 
         // No coordinates in the URL itself, but a place name was — geocode that.
         if (!coords && name) {
           coords = await geocode(name + ", Paris");
         }
 
+        // Still nothing (e.g. a short link) — fall back to the bracketed name.
+        if (!coords && nameOverride) {
+          coords = await geocode(nameOverride + ", Paris");
+        }
+
         if (!coords) {
-          status.textContent = SHORT_LINK_RE.test(raw)
+          status.textContent = SHORT_LINK_RE.test(query)
             ? "That's a shortened map link, which can't be read here. In Maps, tap Share → Copy Address (not Copy Link), or just type the place name below."
             : "Couldn't read coordinates from that link. Try a full Google Maps link (one with @lat,lng in it), or just type the place name instead.";
           status.className = "add-place-status error";
@@ -484,14 +501,16 @@ function initAddPlace() {
         }
         if (!name) name = `Place near ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`;
       } else {
-        coords = await geocode(raw + ", Paris");
+        coords = await geocode(query + ", Paris");
         if (!coords) {
           status.textContent = "Couldn't find that place — try a more specific name.";
           status.className = "add-place-status error";
           return;
         }
-        name = raw;
+        name = query;
       }
+
+      if (nameOverride) name = nameOverride;
 
       const { data, error } = await supabaseClient
         .from("paris_pins")
@@ -500,7 +519,7 @@ function initAddPlace() {
           lat: coords.lat,
           lng: coords.lng,
           notes: notesEl.value.trim() || null,
-          source_url: looksLikeUrl ? raw : null,
+          source_url: looksLikeUrl ? query : null,
           added_by: author,
         })
         .select()

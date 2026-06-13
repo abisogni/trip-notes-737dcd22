@@ -472,6 +472,8 @@
   .add-place button:hover, .journal-form button:hover { background: var(--rose); }
   .add-place button:disabled, .journal-form button:disabled { opacity: 0.5; cursor: default; }
 
+  .add-place-hint { font-size: 11px; color: var(--muted); margin: -4px 0 8px; line-height: 1.5; }
+
   .add-place-status { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.6; min-height: 1.6em; }
   .add-place-status.error,
   .add-place-status.success {
@@ -631,6 +633,7 @@
 <div class="add-place">
   <div class="add-place-head">Add a place to the map</div>
   <input type="text" id="place-input" placeholder="Paste a Google/Apple Maps link, or type a place name">
+  <div class="add-place-hint">Can't be found automatically? Paste the address (or link) and add the name in brackets, e.g. <em>63 Rue Galande, 75005 Paris [Chanceux]</em></div>
   <textarea id="place-notes" rows="2" placeholder="Optional note — what is it, why add it"></textarea>
   <button id="add-place-btn" type="button">Add to map</button>
   <div id="add-place-status" class="add-place-status"></div>

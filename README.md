@@ -48,6 +48,10 @@ The page will be at `https://<username>.github.io/<repo-name>/`.
   name (it's geocoded against central Paris). New pins show up on the map
   for everyone (live, via Supabase realtime) and get their own card under
   "Found along the way" at the bottom of the page.
+- **If the place can't be found by name**: paste the address (or a maps
+  link) and add the name you want in `[brackets]`, e.g.
+  `63 Rue Galande, 75005 Paris [Chanceux]`. The address/link is used to
+  locate the pin, but it's saved under the bracketed name.
 
 ## Known limitations
 
